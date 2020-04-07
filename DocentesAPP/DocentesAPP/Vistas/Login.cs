@@ -15,22 +15,33 @@ namespace DocentesAPP
         Entry entryDocumento, entryCodigo, entryPassword;
         Label Bienvenidos;
         Button buttonAcceder;
-        ImageSource Logo;
+        Image Logo;
         Label OlvidarPassword;
-        BoxView Circulo;
-        BoxView Circulo2;
+        //BoxView Circulo;
+        //BoxView Circulo2;
         uint Tiempo = 200;
         PaginaPrincipal paginaprincipal;
         Image Back;
         TapGestureRecognizer TapBack;
+        OlvidoPassword olvidopassword;
+        TapGestureRecognizer TapOlvidoContraseña;
+        Cargando loading;
+
 
         public Login()
         {
+            BackgroundColor = Color.FromHex("2E4F8F");
             NavigationPage.SetHasNavigationBar(this, false);
             paginaprincipal = new PaginaPrincipal
             {
                 TranslationX = 420,
                 BackgroundColor = Color.White
+
+            };
+            olvidopassword = new OlvidoPassword
+            {
+                TranslationX = 420,
+                BackgroundColor = Color.White,
 
             };
             CrearVistas();
@@ -43,15 +54,25 @@ namespace DocentesAPP
             VistaPrincipal = new RelativeLayout();
             entryCodigo = new Entry
             {
-                Placeholder = "Codigo"
+                PlaceholderColor = Color.White,
+                Placeholder = "Codigo",
+                TextColor = Color.White,
+                Keyboard = Keyboard.Numeric
             };
             entryDocumento = new Entry
             {
-                Placeholder = "Documento"
+                PlaceholderColor = Color.White,
+                Placeholder = "Documento",
+                TextColor = Color.White,
+                MaxLength = 10
             };
             entryPassword = new Entry
             {
-                Placeholder = "Contraseña"
+                PlaceholderColor = Color.White,
+                Placeholder = "Contraseña",
+                TextColor = Color.White,
+                IsPassword = true,
+                
             };
             buttonAcceder = new Button
             {
@@ -61,19 +82,32 @@ namespace DocentesAPP
             };
             Bienvenidos = new Label
             {
-                Text = "Bienvenidos"
+                Text = "Bienvenidos",
+                FontSize = 40,
+                TextColor = Color.White
             };
-            Circulo = new BoxView
+            OlvidarPassword = new Label
             {
-                BackgroundColor = Color.Black,
-                CornerRadius = 40,
-                Scale = 20
+                Text = "¿Olvidaste tu contraseña?",
+                TextColor = Color.White
+
             };
+            loading = new Cargando();
+            //Circulo = new BoxView
+            //{
+            //    BackgroundColor = Color.Black,
+            //    CornerRadius = 40,
+            //    Scale = 20
+            //};
             Back = new Image
             {
                 Source = Imagenes.Back,
                 IsVisible = false
 
+            };
+            Logo = new Image
+            {
+                Source = Imagenes.LogoUtap
             };
             //Circulo2 = new BoxView
             //{
@@ -87,7 +121,9 @@ namespace DocentesAPP
             buttonAcceder.Clicked += ButtonAcceder_Clicked;
 
             TapBack = new TapGestureRecognizer();
+            TapOlvidoContraseña = new TapGestureRecognizer();
 
+            OlvidarPassword.GestureRecognizers.Add(TapOlvidoContraseña);
             Back.GestureRecognizers.Add(TapBack);
 
             VistaGeneral.HorizontalOptions = LayoutOptions.Center;
@@ -97,28 +133,43 @@ namespace DocentesAPP
 
         private async void ButtonAcceder_Clicked(object sender, EventArgs e)
         {
+            Logica log = new Logica();
+
+            bool ValidarPassword = log.ValidarPassword(entryPassword);
+            if (!ValidarPassword)
+            {
+                await DisplayAlert("Advertencia", "El campo Contraseña debe tener al menos 8 caracteres", "Aceptar");
+                return;
+            }
+            
             Rectangle dimensiones = paginaprincipal.Bounds;
             await paginaprincipal.TranslateTo(0, 0, 300);
             Back.IsVisible = true;
+            buttonAcceder.IsVisible = false;
+            OlvidarPassword.IsVisible = false;
+            loading.IsVisible = true;
+            await Task.Delay(1000);
+            loading.IsVisible = false;
         }
+
         async Task AnimacionInicial()
         {
 
             await buttonAcceder.ScaleTo(0.80, Tiempo);
             await buttonAcceder.ScaleTo(1, Tiempo);
         }
-        async Task AnimacionCirculo()
-        {
-            uint Tiempo1 = 800;
-            //await Circulo2.ScaleTo(0, Tiempo1);
-            await Circulo.ScaleTo(0, Tiempo1);
-            Circulo.BackgroundColor = Color.Blue;
-            await Circulo.ScaleTo(40, Tiempo1);
+        //async Task AnimacionCirculo()
+        //{
+        //    uint Tiempo1 = 800;
+        //    //await Circulo2.ScaleTo(0, Tiempo1);
+        //    await Circulo.ScaleTo(0, Tiempo1);
+        //    Circulo.BackgroundColor = Color.Blue;
+        //    await Circulo.ScaleTo(40, Tiempo1);
 
-            await Circulo.FadeTo(0, Tiempo1);
+        //    await Circulo.FadeTo(0, Tiempo1);
 
 
-        }
+        ////}
 
 
         protected override async void OnAppearing()
@@ -126,7 +177,6 @@ namespace DocentesAPP
             base.OnAppearing(); //Se activa a lo que ingrese a la pagina
                                 //await Task.Delay(800);
 
-            await AnimacionCirculo();
 
             // await AnimacionCirculo2();
 
@@ -145,33 +195,58 @@ namespace DocentesAPP
             VistaGeneral.Children.Add(entryCodigo);
             VistaGeneral.Children.Add(entryDocumento);
             VistaGeneral.Children.Add(entryPassword);
-            VistaGeneral.Children.Add(buttonAcceder);
+
             //            VistaGeneral.Children.Add(VistaPrincipal);
 
+            VistaPrincipal.Children.Add(Logo,
+               Constraint.RelativeToParent((p) => { return p.Width * 0.1; }),
+               Constraint.RelativeToParent((p) => { return p.Height * 0.1; })
+               );
+            // VistaPrincipal.Children.Add(Circulo,
+            //Constraint.RelativeToParent((p) => { return p.Width * 0; }), // X Posicion
+            //Constraint.RelativeToParent((p) => { return p.Height * 0; }),// Y Posicion
+            //Constraint.RelativeToParent((p) => { return p.Width * 0.45; }),
+            //Constraint.RelativeToParent((p) => { return p.Height * 0.4; }));
 
-            VistaPrincipal.Children.Add(Circulo,
-           //Constraint.RelativeToParent((p) => { return p.Width * 0; }), // X Posicion
-           //Constraint.RelativeToParent((p) => { return p.Height * 0; }),// Y Posicion
-           Constraint.RelativeToParent((p) => { return p.Width * 0.45; }),
-           Constraint.RelativeToParent((p) => { return p.Height * 0.4; }));
 
             VistaPrincipal.Children.Add(VistaGeneral,
-                Constraint.RelativeToParent((p) => { return p.Width * 0.3; }),
-                Constraint.RelativeToParent((p) => { return p.Width * 0.4; })
+                Constraint.RelativeToParent((p) => { return p.Width * 0.2; }),
+                Constraint.RelativeToParent((p) => { return p.Height * 0.3; })
                 );
             //VistaPrincipal.Children.Add(Circulo2,
             //    Constraint.RelativeToParent((p) => { return p.Width * 0.45; }),
             //    Constraint.RelativeToParent((p => { return p.Height * 0.4; })));
 
-            VistaPrincipal.Children.Add(paginaprincipal,
-       Constraint.RelativeToParent((p) => { return p.Width * 0; }), // X Posicion
-       Constraint.RelativeToParent((p) => { return p.Height * 0; }),// Y Posicion
-       Constraint.RelativeToParent((p) => { return p.Width; }),
-       Constraint.RelativeToParent((p) => { return p.Height; }));
+           VistaPrincipal.Children.Add(paginaprincipal,
+            Constraint.RelativeToParent((p) => { return p.Width * 0; }), // X Posicion
+            Constraint.RelativeToParent((p) => { return p.Height * 0; }),// Y Posicion
+            Constraint.RelativeToParent((p) => { return p.Width; }),
+            Constraint.RelativeToParent((p) => { return p.Height; }));
+            VistaPrincipal.Children.Add(olvidopassword,
+                Constraint.RelativeToParent((p) => { return p.Width * 0; }), // X Posicion
+                Constraint.RelativeToParent((p) => { return p.Height * 0; }),// Y Posicion
+                Constraint.RelativeToParent((p) => { return p.Width; }),
+                Constraint.RelativeToParent((p) => { return p.Height; }));
             VistaPrincipal.Children.Add(Back,
                Constraint.RelativeToParent((p) => { return p.Width * 0; }),
                Constraint.RelativeToParent((p) => { return p.Width * 0; })
                );
+           VistaPrincipal.Children.Add(buttonAcceder,
+                Constraint.RelativeToParent((p) => { return p.Width * 0.3; }),
+                Constraint.RelativeToParent((p) => { return p.Height * 0.7; })
+                //Constraint.RelativeToParent((p) => { return p.Width * 0.50; }), //Ancho
+                //Constraint.RelativeToParent((p) => { return p.Height * 0.10; })
+           );
+           VistaPrincipal.Children.Add(OlvidarPassword,
+              Constraint.RelativeToParent((p) => { return p.Width * 0.3; }),
+              Constraint.RelativeToParent((p) => { return p.Height * 0.8; })
+           );
+            VistaPrincipal.Children.Add(loading,
+                Constraint.RelativeToParent((p) => { return 0; }), //X
+                Constraint.RelativeToParent((p) => { return 0; }), //Y
+                Constraint.RelativeToParent((p) => { return p.Width; }), //ANCHO
+                Constraint.RelativeToParent((p) => { return p.Height; }) //ALTO
+                );
             Content = VistaPrincipal;
 
         }
@@ -180,13 +255,29 @@ namespace DocentesAPP
         {
             Back.GestureRecognizers.Add(TapBack);
             TapBack.Tapped += TapBack_Tapped;
+
+            TapOlvidoContraseña.Tapped += TapOlvidoContraseña_Tapped;
         }
-  
+
+        private async void TapOlvidoContraseña_Tapped(object sender, EventArgs e)
+        {
+            Rectangle dimensiones = olvidopassword.Bounds;
+            await olvidopassword.TranslateTo(0, 0, 200);
+            Back.IsVisible = true;
+            buttonAcceder.IsVisible = false;
+            OlvidarPassword.IsVisible = false;
+            loading.IsVisible = true;
+            await Task.Delay(1000);
+            loading.IsVisible = false;
+        }
 
         private async void TapBack_Tapped(object sender, EventArgs e)
         {
             await paginaprincipal.TranslateTo(450, 0, 200);
+            await olvidopassword.TranslateTo(450, 0, 200);
             Back.IsVisible = false;
+            buttonAcceder.IsVisible = true;
+            OlvidarPassword.IsVisible = true;
 
         }
     }
